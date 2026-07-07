@@ -5,6 +5,7 @@ import io
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
+import requests
 from itertools import combinations
 
 # =============================================================================
@@ -374,16 +375,28 @@ with tab2:
 # --- Вкладка 3: Обратная связь ---
 with tab3:
     st.subheader("💬 Отзывы и предложения")
-    st.write("Напишите нам!")
-    with st.form("feedback_form"):
-        feedback_text = st.text_area("Ваш отзыв:", height=150)
-        submitted = st.form_submit_button("📤 Отправить")
-    if submitted:
-        if not feedback_text.strip():
-            st.error("Введите текст!")
-        else:
-            st.success("✅ Спасибо! Отзыв принят.")
-
+    st.markdown("Напишите мне напрямую! Сообщение придет на почту разработчика.")
+    FORMSPREE_URL = "https://formspree.io/f/mzdlwylv"
+    # Форма без перенаправления
+    with st.form(key="feedback_form"):
+        name = st.text_input("Ваше имя")
+        message = st.text_area("Ваш отзыв", height=150)
+        submitted = st.form_submit_button("📤 Отправить на почту")
+        
+        if submitted:
+            if not message:
+                st.error("Пожалуйста, напишите сообщение.")
+            else:
+                # Отправка данных на Formspree без перезагрузки страницы
+                data = {"name": name, "message": message}
+                try:
+                    response = requests.post(FORMSPREE_URL, data=data)
+                    if response.status_code == 200:
+                        st.success("✅ Спасибо! Ваше сообщение отправлено.")
+                    else:
+                        st.error(f"❌ Ошибка отправки (код {response.status_code}). Попробуйте позже.")
+                except Exception as e:
+                    st.error(f"❌ Ошибка соединения: {e}")
 # --- Вкладка 4: Обратный пересчет ТГ → ЖК ---
 with tab4:
     st.subheader("🔄 Обратный пересчет: ТГ → ЖК")
